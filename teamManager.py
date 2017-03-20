@@ -10,8 +10,6 @@ from telebot import types
 import time
 import argparse
 
-from influxdb import InfluxDBClient
-
 TOKEN = '344940006:AAFvqea_iXiClcFcZDE4cDc5eaHg0vnlucY'
 
 knownUsers = []  # todo: save these in a file,
@@ -109,8 +107,11 @@ def command_add(m):
     global users
     global playes
     i = 0
-    cname = m.chat.first_name
     cid = m.chat.id
+    if cid > 0:
+        cname = m.chat.first_name # Si 'cid' es positivo, usaremos 'm.chat.first_name' para el nombre
+    else:
+        cname = m.from_user.first_name # Si 'cid' es negativo, usaremos 'm.from_user.first_name' para el nombre
     if len(players) > 9:
         bot.send_message(cid, "La /lista esta llena, lo siento")
         return 0
@@ -138,8 +139,11 @@ def command_add(m):
 
 @bot.message_handler(commands=['novoy'])
 def command_remove(m):
-    cname = m.chat.first_name
     cid = m.chat.id
+    if cid > 0:
+        cname = m.chat.first_name # Si 'cid' es positivo, usaremos 'm.chat.first_name' para el nombre
+    else:
+        cname = m.from_user.first_name # Si 'cid' es negativo, usaremos 'm.from_user.first_name' para el nombre
     i = 0
     #actualiza la id del jugador en users
     for user in users:
@@ -165,6 +169,10 @@ def command_remove(m):
 @bot.message_handler(commands=['lista'])
 def command_image(m):
     cid = m.chat.id
+    if cid > 0:
+        cname = m.chat.first_name # Si 'cid' es positivo, usaremos 'm.chat.first_name' para el nombre
+    else:
+        cname = m.from_user.first_name # Si 'cid' es negativo, usaremos 'm.from_user.first_name' para el nombre
     uid = 1
     i = 1
     string = ""
@@ -178,7 +186,7 @@ def command_image(m):
                     cname = user[1]
                     uid = user[0]
                     break
-            string += " %d. %s . %d\n" % (i, cname , uid)
+            string += " %d. %s\n" % (i, cname)
             i = i +1
         if len(place) >= 0:
             string += "\nDonde:\n" + place
@@ -187,6 +195,10 @@ def command_image(m):
 @bot.message_handler(commands=['usuarios'])
 def command_image(m):
     cid = m.chat.id
+    if cid > 0:
+        cname = m.chat.first_name # Si 'cid' es positivo, usaremos 'm.chat.first_name' para el nombre
+    else:
+        cname = m.from_user.first_name # Si 'cid' es negativo, usaremos 'm.from_user.first_name' para el nombre
     i = 1
     string = "Lista de usuarios: \n"
     for user in users:
@@ -245,7 +257,7 @@ def command_write(m):
     for user in users:
         #print str(user[0])+"|"+str(user[1])
         #Write
-        fo.write(str(user[0])+"|"+str(user[1])+"-")
+        fo.write(str(user[0])+"_"+str(user[1])+"|")
     # Close opend file
     fo.close()
 
@@ -254,94 +266,18 @@ def command_read(m):
     i=0
     auxUserR = ""
     # Open a file
-    fo = open("users.txt", "r+")
-    string =fo.read()
-    usersR = string.split("-")
-    for userR in usersR:
-        if i<50:
-            auxUserR = userR.split("|")
-            users[i][0] = int(auxUserR[0])
-            users[i][1] = auxUserR[1]
-            i += 1
-    # Close opend file
-    fo.close()
-
-# if the user has issued the "/getImage" command, process the answer
-@bot.message_handler(func=lambda message: get_user_step(message.chat.id) == 1)
-def msg_image_select(m):
-    cid = m.chat.id
-    text = m.text
-
-    # for some reason the 'upload_photo' status isn't quite working (doesn't show at all)
-    bot.send_chat_action(cid, 'typing')
-
-    if text == "cock":  # send the appropriate image based on the reply to the "/getImage" command
-        bot.send_photo(cid, open('rooster.jpg', 'rb'),
-                       reply_markup=hideBoard)  # send file and hide keyboard, after image is sent
-        userStep[cid] = 0  # reset the users step back to 0
-    elif text == "pussy":
-        bot.send_photo(cid, open('/home/samuel/sucess.jpg', 'rb'), reply_markup=hideBoard)
-        userStep[cid] = 0
-    else:
-        bot.send_message(cid, "Don't type bullsh*t, if I give you a predefined keyboard!")
-        bot.send_message(cid, "Please try again")
-
-
-# filter on a specific message
-@bot.message_handler(func=lambda message: message.text == "data")
-def command_text_hi(m):
-    results = data()
-    # print results
-    for result in results:
-        # print result[0]
-        for field in result:
-            print field['value']
-            bot.send_message(m.chat.id, str(field['value']) + ' pulsaciones a las ' + field['time'] )
-
-
-
-@bot.message_handler(func=lambda message: message.text == "data")
-def data(host='db.h4g.gonebe.com', port=80):
-    user = 'root'
-    password = 'root'
-    dbname = 'testing'
-    query = 'select * from hr where value>=130 '
-    json_body = [
-        {
-            "measurement": "cpu_load_short",
-            "tags": {
-                "host": "server01",
-                "region": "us-west"
-            },
-            "time": "2009-11-10T23:00:00Z",
-            "fields": {
-                "value": 0.64
-            }
-        }
-    ]
-
-    client = InfluxDBClient(host, port, user, password, dbname)
-
-
-    result = client.query(query)
-    #print result
-
-    return result
-
-
-
-def parse_args():
-    parser = argparse.ArgumentParser(
-        description='example code to play with InfluxDB')
-    parser.add_argument('--host', type=str, required=False, default='db.h4g.gonebe.com',
-                        help='hostname of InfluxDB http API')
-    parser.add_argument('--port', type=int, required=False, default=80,
-                        help='port of InfluxDB http API')
-    return parser.parse_args()
-
-
-if __name__ == '__data__':
-    args = parse_args()
-    data(host=args.host, port=args.port)
-
+    try:
+        fo = open("users.txt", "r+")
+        string =fo.read()
+        usersR = string.split("|")
+        for userR in usersR:
+            if i<50:
+                auxUserR = userR.split("_")
+                users[i][0] = int(float(auxUserR[0]))
+                users[i][1] = str(auxUserR[1])
+                i += 1
+        # Close opend file
+        fo.close()
+    except Exception:
+        print "user.txt no encontrado"
 bot.polling()
