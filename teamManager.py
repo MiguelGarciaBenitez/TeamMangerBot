@@ -35,7 +35,8 @@ commands = {  # command description used in the "help" command
               'reset': 'Resetea la lista de jugadores',
               'lista': 'Muestra la lista de jugadores',
               'donde': 'Modifica el lugar del encuentro',
-              'usuarios': 'Muestra los usuarios'
+              'usuarios': 'Muestra los usuarios',
+              'add' : 'Añade a un jugador a lista'
 }
 
 imageSelect = types.ReplyKeyboardMarkup(one_time_keyboard=True)  # create the image selection keyboard
