@@ -79,7 +79,6 @@ bot.set_update_listener(listener)  # register listener
 def command_start(m):
     cid = m.chat.id
     uid = m.from_user.id
-    print m
     try:
         if cid not in knownUsers:  # if user hasn't used the "/start" command yet:
             knownUsers.append(cid)  # save user id, so you could brodcast messages to all users of this bot later
@@ -125,37 +124,36 @@ def command_add(m):
     playerR = []
     playerR.append(uid)
     playerR.append(uname)
-    #actualiza la id del jugador en users
-    for user in users:
-        if user[1] == uname:
-            #actualza la id del jugador en players y users
-            user[0] = uid
-            flag = 1 #en users
-            for j in range(len(players)):
-                if players[j][1] == uname:
-                    players[j][0] = uid
-                    break
-    #introducimos en users si no esta
-    if flag == 0:
-        users.append(playerR)
-        bot.send_message(cid,uname +", te has unido a la /lista")
-    #comprobamos si cabe  n players
-    if len(players) > 9:
-        bot.send_message(cid, "La /lista esta llena, lo siento")
-    #comprobamos si esta en players
-    flag = 0
-    for player in players:
-        if player[0] == uid:
-            if player[1] == uname:
-                bot.send_message(cid, uname + ", ya estas en la /lista")
-                flag = 1
-    #si no esta en players lo introducimos
-    if flag == 0:
-        players.append(playerR)
-    command_Write_Users(m,users)
-    command_Write_Players(m,players)
     try:
-        print ""
+        #actualiza la id del jugador en users
+        for user in users:
+            if user[1] == uname:
+                #actualza la id del jugador en players y users
+                user[0] = uid
+                flag = 1 #en users
+                for j in range(len(players)):
+                    if players[j][1] == uname:
+                        players[j][0] = uid
+                        break
+        #introducimos en users si no esta
+        if flag == 0:
+            users.append(playerR)
+            bot.send_message(cid,uname +", te has unido a la /lista")
+        #comprobamos si cabe  n players
+        if len(players) > 9:
+            bot.send_message(cid, "La /lista esta llena, lo siento")
+        #comprobamos si esta en players
+        flag = 0
+        for player in players:
+            if player[0] == uid:
+                if player[1] == uname:
+                    bot.send_message(cid, uname + ", ya estas en la /lista")
+                    flag = 1
+        #si no esta en players lo introducimos
+        if flag == 0:
+            players.append(playerR)
+        command_Write_Users(m,users)
+        command_Write_Players(m,players)
     except Exception:
         print "ERROR: voy"
 
@@ -175,35 +173,34 @@ def command_remove(m):
     playerR = []
     playerR.append(uid)
     playerR.append(uname)
-    #actualiza la id del jugador en users
-    for user in users:
-        if user[1] == uname:
-            #actualza la id del jugador en players y users
-            user[0] = uid
-            flag = 1 #en users
-            for j in range(len(players)):
-                if players[j][1] == uname:
-                    players[j][0] = uid
-                    break
-    #introducimos en users si no esta
-    if flag == 0:
-        users.append(playerR)
-        bot.send_message(cid,uname +", te has unido a la /lista")
-    #comprobamos si esta en players
-    flag = 0
-    for player in players:
-        if player[1] == uname:
-            if player[0] == uid:
-                players.remove(playerR)
-                flag = 1
-                bot.send_message(cid, uname + ", has sido borrado de la /lista")
-    #no esta en players
-    if flag == 0:
-        bot.send_message(cid, uname + ", no estas en la /lista")
-    command_Write_Users(m,users)
-    command_Write_Players(m,players)
     try:
-        print ""
+        #actualiza la id del jugador en users
+        for user in users:
+            if user[1] == uname:
+                #actualza la id del jugador en players y users
+                user[0] = uid
+                flag = 1 #en users
+                for j in range(len(players)):
+                    if players[j][1] == uname:
+                        players[j][0] = uid
+                        break
+        #introducimos en users si no esta
+        if flag == 0:
+            users.append(playerR)
+            bot.send_message(cid,uname +", te has unido a la /lista")
+        #comprobamos si esta en players
+        flag = 0
+        for player in players:
+            if player[1] == uname:
+                if player[0] == uid:
+                    players.remove(playerR)
+                    flag = 1
+                    bot.send_message(cid, uname + ", has sido borrado de la /lista")
+        #no esta en players
+        if flag == 0:
+            bot.send_message(cid, uname + ", no estas en la /lista")
+        command_Write_Users(m,users)
+        command_Write_Players(m,players)
     except Exception:
         print "ERROR: novoy"
 # user can chose an image (multi-stage command example)
@@ -216,20 +213,19 @@ def command_image(m):
     uid = 1
     i = 1
     string = ""
-    if len(players) == 0:
-        bot.send_message(cid, "Lista vacia")
-    else:
-        string = "Lista de jugadores: \n"
-        for player in players:
-            uid = player[0]
-            uname = player[1]
-            string += " %d. %s\n" % (i, uname)
-            i = i +1
-        if len(place) > 0:
-            string += "\nDonde:\n" + place
-        bot.send_message(cid, string)
     try:
-        print ""
+        if len(players) == 0:
+            bot.send_message(cid, "Lista vacia")
+        else:
+            string = "Lista de jugadores: \n"
+            for player in players:
+                uid = player[0]
+                uname = player[1]
+                string += " %d. %s\n" % (i, uname)
+                i = i +1
+            if len(place) > 0:
+                string += "\nDonde:\n" + place
+            bot.send_message(cid, string)
     except Exception:
         print "ERROR: lista"
 @bot.message_handler(commands=['usuarios'])
@@ -238,14 +234,13 @@ def command_image(m):
     cid = m.chat.id
     i = 1
     string = "Lista de usuarios: \n"
-    for user in users:
-        uid = user[0]
-        uname = user[1]
-        string += " %d. %s\n" % (i, uname)
-        i = i +1
-    bot.send_message(cid, string)
     try:
-        print ""
+        for user in users:
+            uid = user[0]
+            uname = user[1]
+            string += " %d. %s\n" % (i, uname)
+            i = i +1
+        bot.send_message(cid, string)
     except Exception:
         print "ERROR: usuarios"
 
@@ -261,35 +256,33 @@ def command_addS(m):
     playerR = []
     playerR.append(str(uid))
     playerR.append(str(uname))
-    #comprobamos si esta en players
-    if len(players) > 9:
-        bot.send_message(cid, "La /lista esta llena, lo siento")
-    else:
-        for player in players:
-            if player[1] == uname:
-                flag = 1
-                bot.send_message(cid,uname+" ya esta en la /lista")
-    #no esta en players, introducir
-    if flag == 0:
-        if len(uname) > 0:
-            #buscamos en users
-            for i in range(len(users)):
-                if users[i][1] == uname:
-                    flag = 1
-                    #el usuario existe en users
-                    playerR[0] = users[i][0]
-            if flag == 0:
-                idArt += 1
-            #introducir en players
-            players.append(playerR)
-            bot.send_message(cid, uname + " se ha unido a la /lista")
-            command_Write_Users(m,users)
-            command_Write_Players(m,players)
-            print "New user add to list"
-        else:
-            bot.send_message(cid, "Uso: /add nombre")
     try:
-        print ""
+        #comprobamos si esta en players
+        if len(players) > 9:
+            bot.send_message(cid, "La /lista esta llena, lo siento")
+        else:
+            for player in players:
+                if player[1] == uname:
+                    flag = 1
+                    bot.send_message(cid,uname+" ya esta en la /lista")
+        #no esta en players, introducir
+        if flag == 0:
+            if len(uname) > 0:
+                #buscamos en users
+                for i in range(len(users)):
+                    if users[i][1] == uname:
+                        flag = 1
+                        #el usuario existe en users
+                        playerR[0] = users[i][0]
+                if flag == 0:
+                    idArt += 1
+                #introducir en players
+                players.append(playerR)
+                bot.send_message(cid, uname + " se ha unido a la /lista")
+                command_Write_Users(m,users)
+                command_Write_Players(m,players)
+            else:
+                bot.send_message(cid, "Uso: /add nombre")
     except Exception:
         print "ERROR: add"
 @bot.message_handler(commands=['donde'])
@@ -336,7 +329,6 @@ def command_Read_Users(m):
                 i += 1
         # Close opend file
         fo.close()
-        print "Users:\n"+str(users)
         return users
     except Exception:
         print "ERROR: read users"
@@ -368,7 +360,6 @@ def command_Read_Players(m):
                     players.append(auxPlayerR)
                 i += 1
         fo.close()
-        print "Players:\n" + str(players)
         return players
     except Exception:
         print "ERROR: read players"
