@@ -9,7 +9,7 @@ import telebot
 from telebot import types
 import time
 import argparse
-
+import random
 TOKEN = '344940006:AAFvqea_iXiClcFcZDE4cDc5eaHg0vnlucY'
 
 knownUsers = []  # todo: save these in a file,
@@ -26,8 +26,16 @@ players = []
 #0: uid
 #1: name
 place = ""
-
+hora = ""
+r=1
 idArt = 1
+frasesMvp = {   1:'  ha sido el claro MVP del partido',
+                2:' MVP!!!',
+                3:' esta full al 99',
+                4:' es claro MVP, aunque no pulsa R1 ni pa subir',
+                5:', MVP es poco, puto balon de oro diria yo!!',
+                6:' las tiene a todas loquitas con su dribling, ni en el FIFA sin querer te sale eso'
+}
 
 commands = {  # command description used in the "help" command
               'start': 'Inicia el bot',
@@ -138,7 +146,6 @@ def command_add(m):
         #introducimos en users si no esta
         if flag == 0:
             users.append(playerR)
-            bot.send_message(cid,uname +", te has unido a la /lista")
         #comprobamos si cabe  n players
         if len(players) > 9:
             bot.send_message(cid, "La /lista esta llena, lo siento")
@@ -152,6 +159,7 @@ def command_add(m):
         #si no esta en players lo introducimos
         if flag == 0:
             players.append(playerR)
+            bot.send_message(cid,uname +", te has unido a la /lista")
         command_Write_Users(m,users)
         command_Write_Players(m,players)
     except Exception:
@@ -165,49 +173,44 @@ def command_remove(m):
     cid = m.chat.id
     i = 0
     if cid > 0:
-        uname = str(m.chat.first_name.lower().capitalize()) # Si 'cid' es positivo, usaremos 'm.chat.first_name' para el nombre
+        # Si 'cid' es positivo, usaremos 'm.chat.first_name' para el nombre
+        uname = str(m.chat.first_name.lower().capitalize())
         uid = m.chat.id
     else:
+        # Si 'cid' es negativo, usaremos 'm.from_user.first_name' para el nombre
         uid = m.from_user.id
-        uname = str(m.from_user.first_name.lower().capitalize()) # Si 'cid' es negativo, usaremos 'm.from_user.first_name' para el nombre
+        uname = str(m.from_user.first_name.lower().capitalize())
     playerR = []
     playerR.append(uid)
     playerR.append(uname)
+    #actualiza la id del jugador en users
+    for user in users:
+        if user[1] == uname:
+            user[0] = uid
+            flag = 1 #en users
+    #introducimos en users si no esta
+    if flag == 0:
+        users.append(playerR)
+    #comprobamos si esta en players
+    flag = 0
+    for player in players:
+        if player[1] == uname:
+            players.remove(player)
+            flag = 1
+            bot.send_message(cid, uname + ", has sido borrado de la /lista")
+    #no esta en players
+    if flag == 0:
+        bot.send_message(cid, uname + ", no estas en la /lista")
+    command_Write_Users(m,users)
+    command_Write_Players(m,players)
     try:
-        #actualiza la id del jugador en users
-        for user in users:
-            if user[1] == uname:
-                #actualza la id del jugador en players y users
-                user[0] = uid
-                flag = 1 #en users
-                for j in range(len(players)):
-                    if players[j][1] == uname:
-                        players[j][0] = uid
-                        break
-        #introducimos en users si no esta
-        if flag == 0:
-            users.append(playerR)
-            bot.send_message(cid,uname +", te has unido a la /lista")
-        #comprobamos si esta en players
-        flag = 0
-        for player in players:
-            if player[1] == uname:
-                if player[0] == uid:
-                    players.remove(playerR)
-                    flag = 1
-                    bot.send_message(cid, uname + ", has sido borrado de la /lista")
-        #no esta en players
-        if flag == 0:
-            bot.send_message(cid, uname + ", no estas en la /lista")
-        command_Write_Users(m,users)
-        command_Write_Players(m,players)
+        print ""
     except Exception:
         print "ERROR: novoy"
 # user can chose an image (multi-stage command example)
 @bot.message_handler(commands=['lista'])
 def command_image(m):
     cid = m.chat.id
-    users = command_Read_Users(m)
     players = command_Read_Players(m)
     uname = ""
     uid = 1
@@ -285,8 +288,33 @@ def command_addS(m):
                 bot.send_message(cid, "Uso: /add nombre")
     except Exception:
         print "ERROR: add"
+
+@bot.message_handler(commands=['remove'])
+def command_remove(m):
+    players = command_Read_Players(m)
+    cid = m.chat.id
+    uname = m.text[8:15].lower().capitalize()
+    flag = 0
+    if len(uname) > 0:
+        #comprobamos si esta en players
+        for player in players:
+            if player[1] == uname:
+                players.remove(player)
+                command_Write_Players(m,players)
+                bot.send_message(cid,uname+" ha sido borrado de la /lista")
+                flag = 1
+        #no esta en players
+        if flag == 0:
+            bot.send_message(cid, uname + " no esta en la /lista")
+    else:
+        bot.send_message(cid, "Uso: /remove nombre")
+    try:
+        print ""
+    except Exception:
+        print "ERROR: remove"
+
 @bot.message_handler(commands=['donde'])
-def command_addS(m):
+def command_donde(m):
     global place
     cid = m.chat.id
     try:
@@ -298,19 +326,50 @@ def command_addS(m):
             bot.send_message(cid, "Uso: /donde descripcion")
     except Exception:
         print "ERROR: donde"
-def command_Write_Users(m, users):
+@bot.message_handler(commands=['hora'])
+def command_hora(m):
+    global hora
     cid = m.chat.id
     try:
-        # Open a file
-        fo = open("users_"+str(cid)+".txt", "wb")
-        for user in users:
-            #print str(user[0])+"|"+str(user[1])
-            #Write
-            fo.write(str(user[0])+"_"+str(user[1])+"|")
-        # Close opend file
-        fo.close()
+        message = m.text[6:50]
+        if len(message) > 0:
+            hora = message
+            bot.send_message(cid, "Has establecido una hora")
+        else:
+            bot.send_message(cid, "Uso: /hora descripcion")
     except Exception:
-        print "ERROR: write"
+        print "ERROR: hora"
+@bot.message_handler(commands=['mvp'])
+def command_mvp(m):
+    global r
+    cid = m.chat.id
+    uname = m.text[5:15].lower().capitalize()
+    if len(uname) > 0:
+        if r >= 6:
+            r = 1
+        bot.send_message(cid,  uname + frasesMvp[r])
+        r += 1
+    else:
+        bot.send_message(cid, "Uso: /mvp nombre")
+    try:
+        print ""
+    except Exception:
+        print "ERROR: mvp"
+
+def command_Write_Users(m, users):
+    cid = m.chat.id
+    # Open a file
+    fo = open("users_"+str(cid)+".txt", "wb")
+    for user in users:
+        #print str(user[0])+"|"+str(user[1])
+        #Write
+        fo.write(str(user[0])+"_"+str(user[1])+"|")
+    # Close opend file
+    fo.close()
+    try:
+        print ""
+    except Exception:
+        print str(Exception) + "ERROR: write users"
 def command_Read_Users(m):
     users = []
     cid = m.chat.id
@@ -365,13 +424,14 @@ def command_Read_Players(m):
         print "ERROR: read players"
         command_Write_Players(m, players)
         return players
+
 def telegram_polling():
     try:
         bot.polling(none_stop=True, timeout=60) #constantly get messages from Telegram
     except:
-        traceback_error_string=traceback.format_exc()
-        with open("Error.Log", "a") as myfile:
-            myfile.write("\r\n\r\n" + time.strftime("%c")+"\r\n«ERROR polling»\r\n"+ traceback_error_string + "\r\n«ERROR polling»")
+        #traceback_error_string=traceback.format_exc()
+        #with open("Error.Log", "a") as myfile:
+        #    myfile.write("\r\n\r\n" + time.strftime("%c")+"\r\n«ERROR polling»\r\n"+ traceback_error_string + "\r\n«ERROR polling»")
         bot.stop_polling()
         time.sleep(10)
         telegram_polling()
