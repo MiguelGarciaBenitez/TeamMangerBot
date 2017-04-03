@@ -333,7 +333,7 @@ def command_hora(m):
     global hora
     cid = m.chat.id
     try:
-        message = m.text[6:206]
+        message = m.text[8:206]
         if len(message) > 0:
             hora = message
             bot.send_message(cid, "Has establecido una hora")
