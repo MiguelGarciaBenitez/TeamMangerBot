@@ -1,5 +1,7 @@
-#!/usr/local/bin/python
-# coding: utf-8
+#!/usr/bin/env python
+ # -*- coding: cp1252 -*-
+
+
 """
 This modules are needed for the system to work
 http://influxdb-python.readthedocs.io/en/latest/include-readme.html
@@ -183,28 +185,27 @@ def command_remove(m):
     playerR = []
     playerR.append(uid)
     playerR.append(uname)
-    #actualiza la id del jugador en users
-    for user in users:
-        if user[1] == uname:
-            user[0] = uid
-            flag = 1 #en users
-    #introducimos en users si no esta
-    if flag == 0:
-        users.append(playerR)
-    #comprobamos si esta en players
-    flag = 0
-    for player in players:
-        if player[1] == uname:
-            players.remove(player)
-            flag = 1
-            bot.send_message(cid, uname + ", has sido borrado de la /lista")
-    #no esta en players
-    if flag == 0:
-        bot.send_message(cid, uname + ", no estas en la /lista")
-    command_Write_Users(m,users)
-    command_Write_Players(m,players)
     try:
-        print ""
+        #actualiza la id del jugador en users
+        for user in users:
+            if user[1] == uname:
+                user[0] = uid
+                flag = 1 #en users
+        #introducimos en users si no esta
+        if flag == 0:
+            users.append(playerR)
+        #comprobamos si esta en players
+        flag = 0
+        for player in players:
+            if player[1] == uname:
+                players.remove(player)
+                flag = 1
+                bot.send_message(cid, uname + ", has sido borrado de la /lista")
+        #no esta en players
+        if flag == 0:
+            bot.send_message(cid, uname + ", no estas en la /lista")
+        command_Write_Users(m,users)
+        command_Write_Players(m,players)
     except Exception:
         print "ERROR: novoy"
 # user can chose an image (multi-stage command example)
@@ -228,6 +229,8 @@ def command_image(m):
                 i = i +1
             if len(place) > 0:
                 string += "\nDonde:\n" + place
+            if len(hora) > 0:
+                string += "\nCuando:\n" + hora
             bot.send_message(cid, string)
     except Exception:
         print "ERROR: lista"
@@ -254,7 +257,7 @@ def command_addS(m):
     players = command_Read_Players(m)
     cid = m.chat.id
     uid = idArt
-    uname = m.text[5:15].lower().capitalize()
+    uname = m.text[5:55].lower().capitalize()
     flag = 0
     playerR = []
     playerR.append(str(uid))
@@ -293,23 +296,22 @@ def command_addS(m):
 def command_remove(m):
     players = command_Read_Players(m)
     cid = m.chat.id
-    uname = m.text[8:15].lower().capitalize()
+    uname = m.text[8:58].lower().capitalize()
     flag = 0
-    if len(uname) > 0:
-        #comprobamos si esta en players
-        for player in players:
-            if player[1] == uname:
-                players.remove(player)
-                command_Write_Players(m,players)
-                bot.send_message(cid,uname+" ha sido borrado de la /lista")
-                flag = 1
-        #no esta en players
-        if flag == 0:
-            bot.send_message(cid, uname + " no esta en la /lista")
-    else:
-        bot.send_message(cid, "Uso: /remove nombre")
     try:
-        print ""
+        if len(uname) > 0:
+            #comprobamos si esta en players
+            for player in players:
+                if player[1] == uname:
+                    players.remove(player)
+                    command_Write_Players(m,players)
+                    bot.send_message(cid,uname+" ha sido borrado de la /lista")
+                    flag = 1
+            #no esta en players
+            if flag == 0:
+                bot.send_message(cid, uname + " no esta en la /lista")
+        else:
+            bot.send_message(cid, "Uso: /remove nombre")
     except Exception:
         print "ERROR: remove"
 
@@ -318,7 +320,7 @@ def command_donde(m):
     global place
     cid = m.chat.id
     try:
-        message = m.text[7:50]
+        message = m.text[7:207]
         if len(message) > 0:
             place = message
             bot.send_message(cid, "Has establecido un lugar")
@@ -326,12 +328,12 @@ def command_donde(m):
             bot.send_message(cid, "Uso: /donde descripcion")
     except Exception:
         print "ERROR: donde"
-@bot.message_handler(commands=['hora'])
+@bot.message_handler(commands=['cuando'])
 def command_hora(m):
     global hora
     cid = m.chat.id
     try:
-        message = m.text[6:50]
+        message = m.text[6:206]
         if len(message) > 0:
             hora = message
             bot.send_message(cid, "Has establecido una hora")
@@ -343,31 +345,29 @@ def command_hora(m):
 def command_mvp(m):
     global r
     cid = m.chat.id
-    uname = m.text[5:15].lower().capitalize()
-    if len(uname) > 0:
-        if r >= 6:
-            r = 1
-        bot.send_message(cid,  uname + frasesMvp[r])
-        r += 1
-    else:
-        bot.send_message(cid, "Uso: /mvp nombre")
+    uname = m.text[5:55].lower().capitalize()
     try:
-        print ""
+        if len(uname) > 0:
+            if r >= 6:
+                r = 1
+            bot.send_message(cid,  uname + frasesMvp[r])
+            r += 1
+        else:
+            bot.send_message(cid, "Uso: /mvp nombre")
     except Exception:
         print "ERROR: mvp"
 
 def command_Write_Users(m, users):
     cid = m.chat.id
-    # Open a file
-    fo = open("users_"+str(cid)+".txt", "wb")
-    for user in users:
-        #print str(user[0])+"|"+str(user[1])
-        #Write
-        fo.write(str(user[0])+"_"+str(user[1])+"|")
-    # Close opend file
-    fo.close()
     try:
-        print ""
+        # Open a file
+        fo = open("users_"+str(cid)+".txt", "wb")
+        for user in users:
+            #print str(user[0])+"|"+str(user[1])
+            #Write
+            fo.write(str(user[0])+"_"+str(user[1])+"|")
+        # Close opend file
+        fo.close()
     except Exception:
         print str(Exception) + "ERROR: write users"
 def command_Read_Users(m):
