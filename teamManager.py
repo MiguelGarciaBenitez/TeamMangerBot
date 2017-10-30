@@ -12,7 +12,7 @@ from telebot import types
 import time
 import argparse
 import random
-TOKEN = '344940006:AAFvqea_iXiClcFcZDE4cDc5eaHg0vnlucY'
+TOKEN = 'token'
 
 knownUsers = []  # todo: save these in a file,
 userStep = {}  # so they won't reset every time the bot restarts
